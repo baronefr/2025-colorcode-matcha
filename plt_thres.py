@@ -11,7 +11,9 @@ import matplotlib.pyplot as plt
 
 PREFIX = 'circlevel'
 STUDY_CASE = sys.argv[1] if len(sys.argv) > 1 else None
+print(f'loading params for {STUDY_CASE}')
 
+# plotter configuration
 save_plots = True
 PLOT_DIR = "img/"
 
@@ -83,10 +85,6 @@ elif STUDY_CASE == 'srx-1c':
 else:
     raise ValueError(f"unknown study case {STUDY_CASE}")
 
-
-
-# %%
-
 PLOT_TITLE_LEFT = None
 PLOT_TITLE_RIGHT = None
 if 'srx' in STUDY_CASE:
@@ -94,12 +92,7 @@ if 'srx' in STUDY_CASE:
 elif 'ampd' in STUDY_CASE:
     PLOT_TITLE_LEFT = 'AD'
 
-def get_file(prefix, target, d, p_err, repetitions, bd):
-    return DIR + f"{prefix}_{d}_{p_err:.2e}_{repetitions}_{bd}.{target}.csv"
-
-print(f'loaded params for {STUDY_CASE}')
-
-# %%
+# %% reading data
 
 df = pd.read_csv(f"experiments/{STUDY_CASE}.csv")
 distances = df['d'].unique()
@@ -109,14 +102,15 @@ print(df[['d','max_bd','repetitions','p_err']])
 
 # %% plot raw data
 
+colors = ['#003361', '#cc0000', '#f39200',  '#008a25', '#ba00b0', '#0074cc', '#d13060', '#007e82', '#646773'] # colormap from my style file
 markers = ['o', '^', 's', 'D', 'X', 'P', '<', '>']
 for ii, dd in enumerate(distances):
     tmp = df[ df['d'] == dd ]
     plt.plot(tmp['p_err'], tmp['p_fail'],
         label='$d='+f'{dd}$', marker=markers[ii],
-        zorder=10-ii,
+        zorder=10-ii, c=colors[ii],
     )
-    plt.fill_between(tmp['p_err'], tmp['p_fail']-tmp['delta_p_fail'], tmp['p_fail']+tmp['delta_p_fail'], alpha=0.1)
+    plt.fill_between(tmp['p_err'], tmp['p_fail']-tmp['delta_p_fail'], tmp['p_fail']+tmp['delta_p_fail'], color=colors[ii], alpha=0.1)
 plt.ylabel(r'$p_{\mathrm{fail}}$')
 plt.xlabel(PLT_XLABEL)
 plt.yscale('log')
